@@ -1,0 +1,57 @@
+name: Deploy Terraform
+
+# This section defines the events that will trigger the workflow.
+# The workflow runs on any push to the 'main' branch and specifically when changes are made
+# to the infrastructure.yaml file or any file within the 'infrastructure' directory.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/infrastructure.yaml
+      - 'infrastructure/**'
+
+jobs:
+  terraform:
+    # The runner on which the job will execute.
+    runs-on: ubuntu-latest
+
+    # Defaults section to set the working directory for all run commands.
+    defaults:
+      run:
+        working-directory: ./infrastructure
+
+    steps:
+    # The first step checks out the repository code so that subsequent steps can access it.
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # This step configures the AWS credentials needed for the workflow to interact with AWS services.
+    # The AWS access key and secret access key are securely stored in GitHub secrets.
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+        aws-region: ${{ vars.AWS_REGION }}
+
+    # This step sets up Terraform in the GitHub Actions runner environment.
+    # The hashicorp/setup-terraform action installs a specific version of Terraform.
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    # The terraform init command initializes the Terraform working directory.
+    - name: Terraform Init
+      run: terraform init
+
+    # The terraform plan command creates an execution plan.
+    - name: Terraform Plan
+      run: terraform plan
+
+    # The terraform apply command applies the changes required to reach the desired state of the configuration.
+    # The --auto-approve flag automatically approves the plan, applying the changes without manual intervention.
+    - name: Terraform Apply
+      run: terraform apply --auto-approve
+
+# This GitHub Actions workflow automates the process of deploying infrastructure using Terraform.
+# It sets up the necessary environment, initializes Terraform, creates an execution plan, and applies the changes.
