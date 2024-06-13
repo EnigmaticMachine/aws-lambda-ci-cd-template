@@ -45,7 +45,6 @@ flowchart LR
         J --> S3[Create S3 Bucket for Terraform State]
         J --> ECR[Create ECR Repository]
         J --> LAMBDA[Create Lambda Function]
-        J --> APIGW[Create API Gateway]
         J --> IAM[Create IAM Role and Policies]
     end
 
